@@ -13,6 +13,26 @@ player4=pygame.image.load("player4.png")
 mon=pygame.image.load("money.png")
 ship=pygame.image.load("ship.png")
 lava=[pygame.image.load("fire1.png"),pygame.image.load("fire2.png"),pygame.image.load("fire3.png")]
+
+
+
+maxscore=open("maxscore.txt","r")
+max=maxscore.readline()
+maxscore.close()
+maxscore=open("maxscore.txt","w")
+
+
+
+
+
+
+
+
+
+
+
+
+
 fireint=0
 v=0
 playercos=0
@@ -21,11 +41,14 @@ left=0
 right=0
 jump=0
 inertj=3
-level=list("_________________SMMMM_____S__MM_S_____L___MMM__L__________MMM_____++++__M__L__M___++++++___L_____MMMMMM___SS___________________F______________________________________________")
+level=list("LLL________________SMMMM_____S__MM_S_____L___MMM__L__________MMM_____++++__M__L__M___++++++___L_____MMMMMM___SS__________LSL_________F______________________________________________")
 pos=10
 y=525
+music=pygame.mixer.Sound("fm-freemusic-give-me-a-smile.mp3")
+sad=pygame.mixer.Sound("7759cfb9003b104.mp3")
+win=pygame.mixer.Sound("19f925ab5a5e735.mp3")
 class Nadpis:
-    def __init__(self,nadpis,color,root,textc):
+    def __init__(self,nadpis,color,root,textc,max):
         self.nadpis=nadpis
         self.color=color
         self.root=root
@@ -34,11 +57,27 @@ class Nadpis:
         pygame.draw.rect(self.root, self.color, (100, 100, 1070, 520))
         finishtxt = xont.render(self.nadpis, True, self.textc)
         self.root.blit(finishtxt, (150, 300))
+        if self.color==(255, 250, 250):
+            try:
+                if int(self.max)<score:
+                    self.max=score
+                    maxscore.write(str(score))
+                    maxscore.close()
+                txt=xont.render("Max score: "+str(self.max),True,self.textc)
+                self.root.blit(txt,(150,400))
+
+            except:
+                txt = xont.render("Max score: " + str(score), True, self.textc)
+                self.root.blit(txt, (150, 400))
+                maxscore.write(str(score))
+                maxscore.close()
+
         pygame.display.update()
-        time.sleep(1)
+        time.sleep(5)
         quit()
 
 xont=pygame.font.Font('Pixeboy-z8XGD.ttf',40)
+music.play()
 while True:
     fireint += 1
     if fireint==3:
@@ -50,16 +89,18 @@ while True:
         if i.type==pygame.QUIT:
             quit()
         if i.type==pygame.KEYDOWN:
-            if i.key==pygame.K_RIGHT:
+            if i.key==pygame.K_RIGHT or i.key==pygame.K_d:
                 right=1
                 left=0
 
-            if i.key==pygame.K_LEFT:
+            if i.key==pygame.K_LEFT or i.key==pygame.K_a:
                 right=0
                 left=1
-            if i.key==pygame.K_SPACE:
+            if i.key==pygame.K_SPACE or i.key==pygame.K_UP or i.key==pygame.K_w:
                 if y==525:
                     jump=1
+            if i.key==pygame.K_z:
+                music.stop()             #останавливание музыки
 
         if i.type==pygame.KEYUP:
             right=0
@@ -100,7 +141,9 @@ while True:
         if level[pos+i]=="F":
             root.blit(fin,(pos+i*108+850,525))
             if pos-3==pos+i:
-                ses = Nadpis("You collected "+str(score)+" coins. Cool!", (255, 250, 250), root,(0,0,0))
+                music.stop()
+                win.play()
+                ses = Nadpis("You collected "+str(score)+" coins. Cool!", (255, 250, 250), root,(0,0,0),max)
                 ses.place()
 
     if level[pos-2]=="M":
@@ -109,12 +152,16 @@ while True:
     if right:
         if level[pos-3]=="S":
             if y>=500:
-                ses = Nadpis("You lose!!!!", (255, 100, 100), root,(255,255,255))
+                music.stop()
+                sad.play()
+                ses = Nadpis("You lose!!!!", (255, 100, 100), root,(255,255,255),max)
                 ses.place()
     if left:
         if level[pos-2]=="S":
             if y>=500:
-                ses = Nadpis("You lose!!!!", (255, 100, 100), root,(255,255,255))
+                music.stop()
+                sad.play()
+                ses = Nadpis("You lose!!!!", (255, 100, 100), root,(255,255,255),max)
                 ses.place()
     if v>=100 or v<=-100:
         v=0
@@ -123,9 +170,11 @@ while True:
             if y<520:
                 if level[pos - 3] != "+":
                     y+=40
-    if level[pos-2]=="L" or level[pos-3]=="L":
+    if level[pos-3]=="L":
         if y>=500:
-            ses=Nadpis("You burn!!!!!!!!!",(255,150,150),root,(255,255,255))
+            music.stop()
+            sad.play()
+            ses=Nadpis("You burn!!!!!!!!!",(255,150,150),root,(255,255,255),max)
             ses.place()
 
     if right:
@@ -147,4 +196,4 @@ while True:
     if not left and not right:
         root.blit(player,(600,y))
     pygame.display.update()
-    clock.tick(10)
+    clock.tick(12)
